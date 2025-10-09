@@ -38,3 +38,6 @@ export type ProductListResponse = {
     total: number;
     items: IProduct[];
 };
+
+// тип для результата валидации
+export type BuyerValidationErrors = Partial<Record<'payment' | 'address' | 'email' | 'phone', string>>;

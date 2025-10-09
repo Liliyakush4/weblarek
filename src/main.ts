@@ -1,10 +1,10 @@
 import './scss/styles.scss';
-import { Products } from './components/base/Models/Products';
-import { ShoppingCart } from './components/base/Models/ShoppingCart';
-import { BuyerData } from './components/base/Models/BuyerData';
+import { Products } from './components/Models/Products';
+import { ShoppingCart } from './components/Models/ShoppingCart';
+import { BuyerData } from './components/Models/BuyerData';
 import { apiProducts } from './utils/data';
 import { Api } from './components/base/Api';
-import { WebLarekApi } from './components/base/Models/WebLarekApi';
+import { WebLarekApi } from './components/Models/WebLarekApi';
 import { API_URL } from './utils/constants';
 
 // экземпляр API

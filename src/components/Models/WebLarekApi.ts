@@ -1,4 +1,4 @@
-import { IApi, IProduct, OrderData, OrderResult, ProductListResponse } from "../../../types";
+import { IApi, IProduct, OrderData, OrderResult, ProductListResponse } from "../../types";
 export class WebLarekApi {
   private api: IApi;
 
