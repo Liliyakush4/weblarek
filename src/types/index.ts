@@ -1,11 +1,17 @@
+/* Типы HTTP-методов для запросов на сервер*/
 export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 
+/* Интерфейс для работы с API
+Описывает методы для выполнения HTTP-запросов*/
 export interface IApi {
+/* Выполняет GET-запрос для получения данных*/
     get<T extends object>(uri: string): Promise<T>;
+/* Выполняет запрос на изменение данных (POST, PUT, DELETE)*/
     post<T extends object>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
 }
 
-// интерфейс товара
+/* Интерфейс товара в каталоге
+Описывает структуру данных товара*/
 export interface IProduct {
     id: string;
     description: string;
@@ -15,7 +21,8 @@ export interface IProduct {
     price: number | null;
 }
 
-// интерфейс данных покупателя
+/* Интерфейс данных покупателя
+Содержит информацию для оформления заказа*/
 export interface IBuyer {
     payment: 'card' | 'cash' | '';
     address: string;
@@ -23,21 +30,26 @@ export interface IBuyer {
     phone: string;
 }
 
-// типы для данных заказа
+/*Тип данных полного заказа
+Объединяет данные покупателя с информацией о заказе*/
 export type OrderData = IBuyer & {
-    total: number;
-    items: string[];
+    total: number; // общая сумма заказа
+    items: string[]; // массив ID товаров в заказе
 };
 
+/*Тип результата успешного оформления заказа
+Данные, возвращаемые API после создания заказа*/
 export type OrderResult = {
-    id: string;
-    total: number;
+    id: string; // ID заказа
+    total: number;  // общая сумма заказа для подтверждения
 };
 
+/* Тип ответа API для запроса списка товаров*/
 export type ProductListResponse = {
-    total: number;
-    items: IProduct[];
+    total: number; // общее количество товаров
+    items: IProduct[]; // массив товаров
 };
 
-// тип для результата валидации
+/*Тип для ошибок валидации данных покупателя
+Содержит опциональные сообщения об ошибках для каждого поля*/
 export type BuyerValidationErrors = Partial<Record<'payment' | 'address' | 'email' | 'phone', string>>;
