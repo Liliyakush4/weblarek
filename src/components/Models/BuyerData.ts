@@ -1,6 +1,7 @@
 import { IBuyer, BuyerValidationErrors } from "../../types";
+import { IBuyerModel } from "../../types";
 
-export class BuyerData {
+export class BuyerData implements IBuyerModel {
   public data: IBuyer;
 
   constructor(initialData?: IBuyer) {

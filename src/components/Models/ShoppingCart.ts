@@ -1,6 +1,7 @@
 import { IProduct } from "../../types";
+import { ICartModel } from "../../types";
 
-export class ShoppingCart {
+export class ShoppingCart implements ICartModel {
   // используется массив объектов, где каждый объект содержит товар и его количество
   private items: IProduct[] = [];
 

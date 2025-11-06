@@ -6,7 +6,7 @@ type EmitterEvent = {
     eventName: string,
     data: unknown
 };
-
+// интерфейс для оповещения презентера о действиях пользователя
 export interface IEvents {
     on<T extends object>(event: EventName, callback: (data: T) => void): void;
     emit<T extends object>(event: string, data?: T): void;

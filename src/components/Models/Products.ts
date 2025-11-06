@@ -1,6 +1,7 @@
 import { IProduct } from "../../types";
+import { IProductsModel } from "../../types";
 
-export class Products {
+export class Products implements IProductsModel {
   // приватные поля для защищенных данных
   private _products: IProduct[];
   private _selectedCard: IProduct | null;

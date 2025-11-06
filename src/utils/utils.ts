@@ -26,7 +26,7 @@ export function ensureAllElements<T extends HTMLElement>(selectorElement: Select
 }
 
 export type SelectorElement<T> = T | string;
-
+// выбрасывает ошибку, если элемент не найден, предотвращая баги при изменении разметки
 export function ensureElement<T extends HTMLElement>(selectorElement: SelectorElement<T>, context?: HTMLElement): T {
     if (isSelector(selectorElement)) {
         const elements = ensureAllElements<T>(selectorElement, context);
