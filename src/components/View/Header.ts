@@ -10,7 +10,7 @@ export class Header extends Component<IHeader> {
   protected counterElement: HTMLElement;
   protected basketButton: HTMLButtonElement;
 
-  constructor(protected events: IEvents, container: HTMLElement = document.body) {
+  constructor(protected events: IEvents, container: HTMLElement) {
     super(container);
 
     this.counterElement = ensureElement<HTMLElement>('.header__basket-counter', this.container); // найти элементы разметки в контсрукторе класса и сохранить в эти поля

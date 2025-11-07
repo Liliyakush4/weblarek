@@ -17,13 +17,13 @@ import { OrderStep2 } from './components/View/OrderStep2';
 import { Success } from './components/View/Success';
 import { Modal } from './components/View/Modal';
 
-// экземпляр брокера событий
+// брокер событий
 const events: IEvents = new EventEmitter();
 
 // модели
-const productsModel = new Products();
-const shoppingCartModel = new ShoppingCart();
-const buyerDataModel = new BuyerData();
+const productsModel = new Products(events);
+const shoppingCartModel = new ShoppingCart(events);
+const buyerDataModel = new BuyerData(events);
 
 // API
 const apiClient = new Api(API_URL);
@@ -39,91 +39,90 @@ const orderStepOneView = new OrderStep1(events);
 const orderStepTwoView = new OrderStep2(events);
 const successView = new Success(events);
 
+/* подписки на события моделей*/
+// обновление каталога
+events.on('catalog:changed', ({ items }: { items: IProduct[] }) => {
+  galleryView.render({ items });
+});
+
+// счетчик корзины
+events.on('cart:count', ({ count }: { count:number }) => {
+  headerView.render( { counter: count });
+});
+
+// состав корзины изменился
+events.on('cart:changed', ({ items, total }: { items: IProduct[]; total: number }) => {
+modalView.isOpen && modalView.render({ content: basketView.render({ items, total }) });
+});
+
 // загрузка каталога
 loadCatalog();
 
-// контроль событий
+/* контроль пользовательских событий*/
 // открыть корзину
 events.on('basket:open', () => openBasket());
 
 // открыть карточку товара
-events.on('product:open', ({ id: productId }: { id: string }) => {
-  const selectedProduct = productsModel.getProduct(productId);
-  if (!selectedProduct) {
-    console.error(`Product with id ${productId} not found`);
-    return;
-  }
-  const isInCart = isProductInCart(productId);
-  modalView.render({ content: productPreviewView.render({ product: selectedProduct, inCart: isInCart }) });
+events.on('product:open', ({ id }: { id: string }) => {
+  const product = productsModel.getProduct(id);
+  if (!product) return console.error(`Продукт с ID ${id} не найден`);
+  const inCart = shoppingCartModel.checkProductInCart(id);
+  modalView.render({ content: productPreviewView.render({ product, inCart }) });
   modalView.open();
 });
 
 // добавить товар в корзину
-events.on('product:add', ({ id: productId }: { id: string }) => {
-  const selectedProduct = productsModel.getProduct(productId);
-  if (!selectedProduct) {
-    console.error(`Product with id ${productId} not found`);
-    return;
-  }
-  shoppingCartModel.addItem(selectedProduct);
-  updateBasketCounter();
+events.on('product:add', ({ id }: { id: string }) => {
+  const product = productsModel.getProduct(id);
+  if (!product) return console.error(`Продукт с ID ${id} не найден`);
+  shoppingCartModel.addItem(product);
   modalView.close();
 });
 
 // удалить товар из корзины внутри карточки товара
-events.on('product:remove', ({ id: productId }: { id: string }) => {
-  shoppingCartModel.removeItem(productId);
-  updateBasketCounter();
+events.on('product:remove', ({ id }: { id: string }) => {
+  shoppingCartModel.removeItem(id);
   modalView.close();
 });
 
 // удалить товар из корзины внутри корзины
-events.on('cart:remove', ({ id: productId }: { id: string }) => {
-  shoppingCartModel.removeItem(productId);
-  updateBasketCounter();
+events.on('cart:remove', ({ id }: { id: string }) => {
+  shoppingCartModel.removeItem(id);
   openBasket();
 });
 
 // оформление заказа
 events.on('order:open', () => {
-  const currentBuyerData = buyerDataModel.getData();
-  modalView.render({
-    content: orderStepOneView.render({
-      payment: currentBuyerData.payment,
-      address: currentBuyerData.address,
-    }),
-  });
+  const d = buyerDataModel.getData();
+  modalView.render({ content: orderStepOneView.render({ payment: d.payment, address: d.address }) });
 });
+
 events.on('order:step1:submit', (payload: { payment: 'card' | 'cash' | ''; address: string }) => {
-  buyerDataModel.setData({ ...buyerDataModel.getData(), ...payload });
-  const currentBuyerData = buyerDataModel.getData();
+  buyerDataModel.setData(payload);
+  const d = buyerDataModel.getData();
   modalView.render({
-    content: orderStepTwoView.render({
-      email: currentBuyerData.email,
-      phone: currentBuyerData.phone,
-    }),
-  });
+    content: orderStepTwoView.render({ email: d.email, phone: d.phone }) });
 });
+
 events.on('order:step2:submit', async ({ email, phone }: { email: string; phone: string }) => {
-  buyerDataModel.setData({ ...buyerDataModel.getData(), email, phone });
-  const productsInCart = shoppingCartModel.getItems();
-  const totalSum = calculateTotal(productsInCart);
+  buyerDataModel.setData({ email, phone });
+
+  const items = shoppingCartModel.getItems();
+  const total = items.reduce((s, p) => s + (p.price ?? 0), 0);
+
   const orderPayload: OrderData = {
     ...buyerDataModel.getData(),
-    total: totalSum,
-    items: productsInCart.map((product) => product.id),
+    total,
+    items: items.map(p => p.id),
   };
 
   try {
     // отправляем заказ
     const orderResponse = await webLarekApi.submitOrder(orderPayload);
-    shoppingCartModel.clear();
-    updateBasketCounter();
-
     // очищаем данные
-    buyerDataModel.setData({ payment: '', address: '', email: '', phone: '' });
-
-    modalView.render({ content: successView.render({ total: orderResponse.total }) });
+    shoppingCartModel.clear();
+    buyerDataModel.clear();
+    modalView.render({ content: successView.render({ total: orderResponse.total })});
   } catch {
     alert('Ошибка оплаты. Повторите попытку');
   }
@@ -132,6 +131,9 @@ events.on('order:step2:submit', async ({ email, phone }: { email: string; phone:
 // внешнее закрытие модального окна по событию
 events.on('modal:close', () => modalView.close());
 
+headerView.render( { counter: shoppingCartModel.getTotalCount() });
+
+// вспомогательные функции
 async function loadCatalog() {
   try {
     const productsList = await webLarekApi.getProductList();
@@ -148,38 +150,13 @@ async function loadCatalog() {
       return { ...product, image: imageUrl };
     });
     productsModel.saveData(productsList);
-  } finally {
-    renderCatalog();
-    updateBasketCounter();
   }
-}
-
-// рендер каталога
-function renderCatalog() {
-  const productsList = productsModel.getProductList();
-  galleryView.render({ items: productsList });
 }
 
 // открыть корзину
 function openBasket() {
-  const productsInCart = shoppingCartModel.getItems();
-  const totalSum = calculateTotal(productsInCart);
-  modalView.render({ content: basketView.render({ items: productsInCart, total: totalSum }) });
+  const items = shoppingCartModel.getItems();
+  const total = items.reduce((s, p) => s + (p.price ?? 0), 0);
+  modalView.render({ content: basketView.render({ items, total }) });
   modalView.open();
-}
-
-// обновить счётчик корзины
-function updateBasketCounter() {
-  headerView.render({ counter: shoppingCartModel.getTotalCount() });
-}
-
-// подсчёт суммы
-function calculateTotal(products: IProduct[]) {
-  return products.reduce((sum, product) => sum + (product.price ?? 0), 0);
-}
-
-// проверка, есть ли товар в корзине
-function isProductInCart(productId: string) {
-  const productsInCart = shoppingCartModel.getItems();
-  return productsInCart.some((product) => product.id === productId);
 }

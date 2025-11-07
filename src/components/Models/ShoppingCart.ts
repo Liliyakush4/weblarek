@@ -1,12 +1,14 @@
 import { IProduct } from "../../types";
 import { ICartModel } from "../../types";
+import { IEvents } from "../base/Events";
 
 export class ShoppingCart implements ICartModel {
   // используется массив объектов, где каждый объект содержит товар и его количество
   private items: IProduct[] = [];
 
-  constructor(initialItems: IProduct[] = []) {
+  constructor(private events: IEvents, initialItems: IProduct[] = []) {
     this.items = [...initialItems];
+    this.emitChanged();
   }
 
   getItems(): IProduct[] {
@@ -16,16 +18,19 @@ export class ShoppingCart implements ICartModel {
   addItem(product: IProduct): void {
     if (!this.checkProductInCart(product.id)) {
       this.items.push(product);
+      this.emitChanged();
      }
   }
 
   removeItem(productId: string): void {
     this.items = this.items.filter(p => p.id !== productId);
+    this.emitChanged();
   }
 
 
   clear(): void {
     this.items = [];
+    this.emitChanged();
   }
 
   getTotalPrice(): number {
@@ -38,5 +43,13 @@ export class ShoppingCart implements ICartModel {
 
   checkProductInCart(productId: string): boolean {
     return this.items.some(p => p.id === productId);
+  }
+
+  private emitChanged(): void {
+    this.events.emit('cart:changed', {
+      items: [...this.items],
+      total: this.getTotalPrice(),
+    });
+    this.events.emit('cart:count', { count: this.items.length });
   }
 }

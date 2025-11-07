@@ -1,10 +1,11 @@
 import { IBuyer, BuyerValidationErrors } from "../../types";
 import { IBuyerModel } from "../../types";
+import { IEvents } from "../base/Events";
 
 export class BuyerData implements IBuyerModel {
   public data: IBuyer;
 
-  constructor(initialData?: IBuyer) {
+  constructor(private events: IEvents, initialData?: IBuyer) {
     //инициализируем данные
     this.data = initialData || {
       payment: '',
@@ -15,10 +16,8 @@ export class BuyerData implements IBuyerModel {
   }
 
 setData(data: Partial<IBuyer>): void {
-  this.data = {
-    ...this.data,
-    ...data
-  };
+  this.data = { ...this.data, ...data };
+  this.events.emit('buyer:changed', { ...this.data });
 }
 
 getData(): IBuyer {
@@ -26,31 +25,17 @@ getData(): IBuyer {
 }
 
 clear(): void {
-  this.data = {
-    payment: '',
-    address: '',
-    email: '',
-    phone: ''
-  };
+  this.data = { payment: '', address: '', email: '', phone: '' };
+  this.events.emit('buyer:changed', { ...this.data });
 }
 
 validate(): BuyerValidationErrors {
   const errors: BuyerValidationErrors = {};
-
   // проверка каждого поля на пустоту
-    if (!this.data.payment) {
-      errors.payment = 'Способ оплаты не выбран';
-    }
-    if (!this.data.address?.trim()) {
-      errors.address = 'Адрес не указан';
-    }
-    if (!this.data.email?.trim()) {
-      errors.email = 'Email не указан';
-    }
-      if (!this.data.phone?.trim()) {
-      errors.phone = 'Номер телефона не указан';
-    }
-
-    return errors;
+    if (!this.data.payment) errors.payment = 'Способ оплаты не выбран';
+    if (!this.data.address?.trim()) errors.address = 'Адрес не указан';
+    if (!this.data.email?.trim())  errors.email = 'Email не указан';
+    if (!this.data.phone?.trim())  errors.phone = 'Номер телефона не указан';
+      return errors;
     }
   }
