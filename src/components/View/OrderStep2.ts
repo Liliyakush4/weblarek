@@ -1,82 +1,58 @@
-import { Component } from '../base/Component';
+import { Form } from './Form';
 import { IEvents } from '../base/Events';
 import { ensureElement } from '../../utils/utils';
 
 interface IOrderStep2 {
   email: string;
   phone: string;
-  errors?: string;
-  canSubmit?: boolean;
+  errors: string[];
 }
 
-export class OrderStep2 extends Component<IOrderStep2> {
+export class OrderStep2 extends Form<IOrderStep2> {
+  protected formName = 'step2';
+  
   protected emailInput: HTMLInputElement;
   protected phoneInput: HTMLInputElement;
-  protected submitButton: HTMLButtonElement;
-  protected errorsElement: HTMLElement;
 
-  private currentEmail = '';
-  private currentPhone = '';
-
-  constructor(
+    constructor(
     protected events: IEvents,
-    template: HTMLTemplateElement = ensureElement<HTMLTemplateElement>('#contacts')
+    template: HTMLTemplateElement
   ) {
-    const rootNode = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
-    super(rootNode);
+    const container = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
+    super(events, container);
 
     this.emailInput = ensureElement<HTMLInputElement>('input[name="email"]', this.container);
     this.phoneInput = ensureElement<HTMLInputElement>('input[name="phone"]', this.container);
-    this.submitButton = ensureElement<HTMLButtonElement>('button[type="submit"]', this.container);
-    this.errorsElement = ensureElement('.form__errors', this.container);
 
-    const onChange = () => {
-      this.currentEmail = this.emailInput.value.trim();
-      this.currentPhone = this.phoneInput.value.trim();
-      this.validate();
-    };
+    this.emailInput.addEventListener('input', () => {
+      this.emitFormChange({ email: this.emailInput.value });
+    });
 
-    // синхронизация значений полей с состоянием компонента
-    this.emailInput.addEventListener('input', onChange);
-    this.phoneInput.addEventListener('input', onChange);
-
-    this.container.addEventListener('submit', (event) => {
-      event.preventDefault();
-      if (this.submitButton.disabled) return;
-      this.events.emit('order:step2:submit', {
-        email: this.currentEmail,
-        phone: this.currentPhone,
-      });
+    this.phoneInput.addEventListener('input', () => {
+      this.emitFormChange({ phone: this.phoneInput.value });
     });
   }
 
-  private validate() {
-    const errors: string[] = [];
-    if (!this.currentEmail) errors.push('Укажите email');
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.currentEmail)) errors.push('Некорректный email');
-    if (!this.currentPhone) errors.push('Укажите телефон');
-
-    this.errors = errors.join('. ');
-    this.canSubmit = errors.length === 0;
+  protected submitForm(): void {
+    this.events.emit('order:step2:submit');
   }
 
   set email(value: string) {
-    this.currentEmail = value ?? '';
-    this.emailInput.value = this.currentEmail;
-    this.validate();
+    this.emailInput.value = value ?? '';
   }
 
   set phone(value: string) {
-    this.currentPhone = value ?? '';
-    this.phoneInput.value = this.currentPhone;
-    this.validate();
+    this.phoneInput.value = value ?? '';
   }
 
-  set errors(text: string) {
-    this.errorsElement.textContent = text ?? '';
+  set errors(errors: string[]) {
+    this.textErrors = errors.join('. ');
   }
 
-  set canSubmit(flag: boolean) {
-    this.submitButton.disabled = !flag;
+  reset() {
+    this.emailInput.value = '';
+    this.phoneInput.value = '';
+    this.textErrors = '';
+    this.disableSubmitButton();
   }
 }

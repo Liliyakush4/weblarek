@@ -1,27 +1,29 @@
-import { IApi, IProduct, OrderData, OrderResult, ProductListResponse } from '../../types';
-import { CDN_URL } from '../../utils/constants';
+import { IApi, IProduct, OrderData, OrderResult, ProductListResponse } from "../../types";
 
 export class WebLarekApi {
-  constructor(private readonly api: IApi) {}
+  private api: IApi;
 
-  // список товаров
-  async getProductList(): Promise<IProduct[]> {
-    const response = await this.api.get<ProductListResponse>('/product/');
-
-    const cdnBaseUrl = CDN_URL.replace(/\/$/, '');
-    return response.items.map((product) => {
-      const imageWithPng = product.image.replace(/\.svg$/i, '.png');
-      const imageFileName = imageWithPng.replace(/^\//, '');
-      const imageUrl = /^https?:\/\//i.test(imageWithPng)
-        ? imageWithPng
-        : `${cdnBaseUrl}/${imageFileName}`;
-
-      return { ...product, image: imageUrl };
-    });
+  constructor(api: IApi) {
+    this.api = api;
   }
 
-  // создание заказа
+  async getProductList(): Promise<IProduct[]> {
+    try {
+      const response = await this.api.get<ProductListResponse>('/product/');
+      return response.items;
+    } catch (error) {
+      console.error('Ошибка при получении списка товаров:', error);
+      return [];
+    }
+  }
+
   async submitOrder(orderData: OrderData): Promise<OrderResult> {
-    return this.api.post<OrderResult>('/order/', orderData);
+    try {
+      const response = await this.api.post<OrderResult>('/order/', orderData);
+      return response;
+    } catch (error) {
+      console.error('Ошибка при отправке заказа:', error);
+      throw error;
+    }
   }
 }

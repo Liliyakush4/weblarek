@@ -1,8 +1,7 @@
 import { IBuyer, BuyerValidationErrors } from "../../types";
-import { IBuyerModel } from "../../types";
 import { IEvents } from "../base/Events";
 
-export class BuyerData implements IBuyerModel {
+export class BuyerData {
   public data: IBuyer;
 
   constructor(private events: IEvents, initialData?: IBuyer) {
@@ -32,10 +31,10 @@ clear(): void {
 validate(): BuyerValidationErrors {
   const errors: BuyerValidationErrors = {};
   // проверка каждого поля на пустоту
-    if (!this.data.payment) errors.payment = 'Способ оплаты не выбран';
-    if (!this.data.address?.trim()) errors.address = 'Адрес не указан';
-    if (!this.data.email?.trim())  errors.email = 'Email не указан';
-    if (!this.data.phone?.trim())  errors.phone = 'Номер телефона не указан';
+    if (!this.data.payment) errors.payment = 'Необходимо выбрать способ оплаты';
+    if (!this.data.address?.trim()) errors.address = 'Необходимо указать адрес';
+    if (!this.data.email?.trim())  errors.email = 'Укажите ваш email';
+    if (!this.data.phone?.trim())  errors.phone = 'Укажите ваш номер телефона';
       return errors;
     }
   }

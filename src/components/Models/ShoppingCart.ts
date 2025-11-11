@@ -1,8 +1,7 @@
 import { IProduct } from "../../types";
-import { ICartModel } from "../../types";
 import { IEvents } from "../base/Events";
 
-export class ShoppingCart implements ICartModel {
+export class ShoppingCart {
   // используется массив объектов, где каждый объект содержит товар и его количество
   private items: IProduct[] = [];
 
@@ -49,7 +48,7 @@ export class ShoppingCart implements ICartModel {
     this.events.emit('cart:changed', {
       items: [...this.items],
       total: this.getTotalPrice(),
+      count: this.items.length
     });
-    this.events.emit('cart:count', { count: this.items.length });
   }
 }

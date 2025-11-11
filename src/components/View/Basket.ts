@@ -1,58 +1,52 @@
-import { Component } from '../base/Component';
 import { IEvents } from '../base/Events';
-import { ensureElement } from '../../utils/utils';
-import { IProduct } from '../../types';
-import { BasketItem } from './BasketItem';
+import { createElement, ensureElement } from '../../utils/utils';
+import { Component } from '../base/Component';
 
-interface IBasketView {
-  items: IProduct[];
+interface IBasket {
+  items: HTMLElement[];
   total: number;
 }
 
-export class Basket extends Component<IBasketView> {
+export class Basket extends Component<IBasket> {
   protected listElement: HTMLElement;
   protected totalElement: HTMLElement;
-  protected submitButton: HTMLButtonElement;
-  protected itemTemplate: HTMLTemplateElement;
+  protected buttonElement: HTMLButtonElement;
+  protected emptyMessage: HTMLElement;
 
-  constructor(
+    constructor(
     protected events: IEvents,
-    template: HTMLTemplateElement = ensureElement<HTMLTemplateElement>('#basket')
+    template: HTMLTemplateElement
   ) {
-    const rootNode = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
-    super(rootNode);
+    const container = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
+    super(container);
 
     this.listElement = ensureElement('.basket__list', this.container);
     this.totalElement = ensureElement('.basket__price', this.container);
-    this.submitButton = ensureElement<HTMLButtonElement>('.basket__button', this.container);
-    this.itemTemplate = ensureElement<HTMLTemplateElement>('#card-basket');
+    this.buttonElement = ensureElement<HTMLButtonElement>('.basket__button', this.container);
 
-    this.submitButton.addEventListener('click', () => {
-      if (!this.submitButton.disabled) this.events.emit('order:open');
+    this.emptyMessage = createElement<HTMLDivElement>('div', {
+      className: 'basket__empty',
+      textContent: 'Корзина пуста'
+    });
+
+    this.buttonElement.addEventListener('click', () => {
+      if (!this.buttonElement.disabled) this.events.emit('order:open');
     });
   }
 
-  set items(productsList: IProduct[]) {
-    if (productsList.length === 0) {
-      this.listElement.replaceChildren(document.createTextNode('Корзина пуста'));
-      this.submitButton.disabled = true;
-      return;
+  set items(items: HTMLElement[]) {
+    this.listElement.innerHTML = '';
+    
+    if (items.length === 0) {
+        this.listElement.appendChild(this.emptyMessage);
+        this.buttonElement.disabled = true;
+    } else {
+        this.listElement.replaceChildren(...items);
+        this.buttonElement.disabled = false;
     }
-
-    const fragment = document.createDocumentFragment();
-    productsList.forEach((product, index) => {
-      const listItem = new BasketItem(this.events, this.itemTemplate).render({
-        index: index + 1,
-        product,
-      });
-      fragment.append(listItem);
-    });
-
-    this.listElement.replaceChildren(fragment);
-    this.submitButton.disabled = false;
   }
 
-  set total(totalAmount: number) {
-    this.totalElement.textContent = `${totalAmount} синапсов`;
+  set total(value: number) {
+    this.totalElement.textContent = `${value} синапсов`;
   }
 }

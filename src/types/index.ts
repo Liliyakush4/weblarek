@@ -55,27 +55,3 @@ export type ProductListResponse = {
 /*Тип для ошибок валидации данных покупателя
 Содержит опциональные сообщения об ошибках для каждого поля*/
 export type BuyerValidationErrors = Partial<Record<'payment' | 'address' | 'email' | 'phone', string>>;
-
-/* Интерфейс для работы с продуктами */
-export interface IProductsModel {
-  saveData(products: IProduct[]): void;
-  getProductList(): IProduct[];
-  getProduct(id: string): IProduct | undefined;
-}
-
-/* Интерфейс для работы с корзиной */
-export interface ICartModel {
-  addItem(product: IProduct): void;
-  removeItem(id: string): void;
-  clear(): void;
-  getItems(): IProduct[];
-  getTotalCount(): number;
-}
-
-/* Интерфейс для данных покупателя */
-export interface IBuyerModel {
-  setData(data: Partial<IBuyer>): void;
-  getData(): IBuyer;
-  clear(): void;
-  validate(): BuyerValidationErrors;
-}

@@ -1,8 +1,7 @@
 import { IProduct } from "../../types";
-import { IProductsModel } from "../../types";
 import { IEvents } from "../base/Events";
 
-export class Products implements IProductsModel {
+export class Products {
 // приватные поля для защищенных данных
   private _products: IProduct[];
   private _selectedCard: IProduct | null;
@@ -13,6 +12,10 @@ export class Products implements IProductsModel {
   }
 
 // геттеры для доступа к данным
+  get products(): IProduct[] {
+    return [...this._products]
+  }
+
   get selectedCard(): IProduct | null {
     return this._selectedCard ? { ...this._selectedCard } : null;
 }
