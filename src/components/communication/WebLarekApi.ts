@@ -8,22 +8,12 @@ export class WebLarekApi {
   }
 
   async getProductList(): Promise<IProduct[]> {
-    try {
       const response = await this.api.get<ProductListResponse>('/product/');
       return response.items;
-    } catch (error) {
-      console.error('Ошибка при получении списка товаров:', error);
-      return [];
     }
-  }
 
   async submitOrder(orderData: OrderData): Promise<OrderResult> {
-    try {
       const response = await this.api.post<OrderResult>('/order/', orderData);
       return response;
-    } catch (error) {
-      console.error('Ошибка при отправке заказа:', error);
-      throw error;
     }
   }
-}

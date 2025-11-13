@@ -1,4 +1,5 @@
 import { IProduct } from "../../types";
+import { AppEvents } from "../../types/events";
 import { IEvents } from "../base/Events";
 
 export class ShoppingCart {
@@ -45,7 +46,7 @@ export class ShoppingCart {
   }
 
   private emitChanged(): void {
-    this.events.emit('cart:changed', {
+    this.events.emit(AppEvents.CartChanged, {
       items: [...this.items],
       total: this.getTotalPrice(),
       count: this.items.length

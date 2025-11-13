@@ -1,3 +1,4 @@
+import { AppEvents } from "../../types/events";
 import { ensureElement } from "../../utils/utils";
 import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
@@ -17,7 +18,7 @@ export class Header extends Component<IHeader> {
     this.basketButton = ensureElement<HTMLButtonElement>('.header__basket', this.container);
 
     this.basketButton.addEventListener('click', () => {
-      this.events.emit('basket:open');
+      this.events.emit(AppEvents.BasketOpen);
     });
   }
 
@@ -25,8 +26,3 @@ export class Header extends Component<IHeader> {
     this.counterElement.textContent = String(value);
   }
 }
-    // обращение к полю класса, которое содержит ссылку на DOM-элемент
-    // применение к полю класса, которое содержит экземпляр системы событий метода системы событий для генерации события
-    // уведомляет систему о необходимости открыть модальное окно корзины
-    // название события, которое мы генерируем ("сущность: действие")
-    // сеттер автоматически вызывается при использовании метода render() и наличия соответствующих данных

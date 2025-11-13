@@ -1,6 +1,7 @@
 import { Component } from '../base/Component';
 import { IEvents } from '../base/Events';
 import { ensureElement } from '../../utils/utils';
+import { AppEvents } from '../../types/events';
 
 interface IForm {
   textErrors: string;
@@ -29,7 +30,7 @@ export abstract class Form<T> extends Component<IForm & T> {
     protected abstract submitForm(): void;
 
     protected emitFormChange(data: object): void {
-        this.events.emit('form:change', {
+        this.events.emit(AppEvents.FormChange, {
             form: this.formName,
             data: data
         });

@@ -1,6 +1,7 @@
 import { Form } from './Form';
 import { IEvents } from '../base/Events';
 import { ensureElement } from '../../utils/utils';
+import { AppEvents } from '../../types/events';
 
 interface IOrderStep2 {
   email: string;
@@ -34,7 +35,7 @@ export class OrderStep2 extends Form<IOrderStep2> {
   }
 
   protected submitForm(): void {
-    this.events.emit('order:step2:submit');
+    this.events.emit(AppEvents.OrderStep2Submit);
   }
 
   set email(value: string) {

@@ -1,4 +1,5 @@
 import { IProduct } from "../../types";
+import { AppEvents } from "../../types/events";
 import { IEvents } from "../base/Events";
 
 export class Products {
@@ -23,7 +24,7 @@ export class Products {
 // загрузка/обновлени каталога
   saveData(data: IProduct[]): void {
     this._products = [...data];
-    this.events.emit('catalog:changed', { items: [...this._products] });
+    this.events.emit(AppEvents.CatalogChanged, { items: [...this._products] });
   }
 
   getProductList(): IProduct[] {
@@ -36,7 +37,7 @@ export class Products {
 // выбор карточки
   saveCard(card: IProduct): void {
     this._selectedCard = { ...card };
-    this.events.emit('product:selected', { product: {...this._selectedCard} });
+    this.events.emit(AppEvents.ProductSelected, { product: {...this._selectedCard} });
   }
 
   getCard(): IProduct | null {

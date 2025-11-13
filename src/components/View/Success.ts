@@ -1,6 +1,7 @@
 import { IEvents } from '../base/Events';
 import { ensureElement } from '../../utils/utils';
 import { Component } from '../base/Component';
+import { AppEvents } from '../../types/events';
 
 interface ISuccess {
   total: number;
@@ -21,7 +22,7 @@ constructor(
     this.closeButton = ensureElement<HTMLButtonElement>('.order-success__close', this.container);
 
     this.closeButton.addEventListener('click', () => {
-      this.events.emit('modal:closed');
+      this.events.emit(AppEvents.SuccessClose);
     });
   }
 

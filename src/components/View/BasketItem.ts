@@ -1,6 +1,7 @@
 import { Card } from './Card';
 import { IEvents } from '../base/Events';
 import { ensureElement } from '../../utils/utils';
+import { AppEvents } from '../../types/events';
 
 interface IBasketItem {
   index: number;
@@ -18,7 +19,7 @@ export class BasketItem extends Card<IBasketItem> {
     this.deleteButton = ensureElement<HTMLButtonElement>('.basket__item-delete', this.container);
 
     this.deleteButton.addEventListener('click', () =>
-      this.events.emit('cart:remove', { element: this.container })
+      this.events.emit(AppEvents.CartRemove, { id: this.id })
     );
   }
 

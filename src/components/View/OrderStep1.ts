@@ -2,6 +2,7 @@ import { Form } from './Form';
 import { IEvents } from '../base/Events';
 import { ensureElement } from '../../utils/utils';
 import { IBuyer } from '../../types';
+import { AppEvents } from '../../types/events';
 
 interface IOrderStep1 {
   payment: IBuyer['payment'];
@@ -54,7 +55,7 @@ export class OrderStep1 extends Form<IOrderStep1> {
   }
 
   protected submitForm(): void {
-    this.events.emit('order:step1:submit');
+    this.events.emit(AppEvents.OrderStep1Submit);
   }
 
   set payment(value: IBuyer['payment']) {

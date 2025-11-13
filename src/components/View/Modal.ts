@@ -1,6 +1,7 @@
 import { Component } from '../base/Component';
 import { IEvents } from '../base/Events';
 import { ensureElement } from '../../utils/utils';
+import { AppEvents } from '../../types/events';
 
 export class Modal extends Component<{}> {
   private contentElement: HTMLElement;
@@ -16,22 +17,16 @@ export class Modal extends Component<{}> {
   }
 
   private setupEventListeners(): void {
-  this.closeButton.addEventListener('click', () => {
-    this.events.emit('modal:closed');
+    this.closeButton.addEventListener('click', () => {
+      this.close();
   });
   
-  this.container.addEventListener('mousedown', (event: MouseEvent) => {
-    if (!this.contentElement.contains(event.target as Node)) {
-      this.events.emit('modal:closed');
+  this.container.addEventListener('click', (event: MouseEvent) => {
+    if (event.target === this.container) {
+      this.close();
     }
   });
-
-  document.addEventListener('keydown', (event: KeyboardEvent) => {
-    if (event.key === 'Escape' && this.isOpen) {
-      this.events.emit('modal:closed');
-    }
-  });
-}
+  }
 
   private get isOpen(): boolean {
     return this.container.classList.contains('modal_active');
@@ -41,16 +36,25 @@ export class Modal extends Component<{}> {
     this.contentElement.replaceChildren(content);
   }
 
+  private _handleEscape = (evt: KeyboardEvent) => {
+    if (evt.key === 'Escape') {
+      this.close();
+    }
+  };
+
   open(): void {
     if (!this.isOpen) {
     this.container.classList.add('modal_active');
     document.body.style.overflow = 'hidden';
-   }
+    document.addEventListener('keydown', this._handleEscape);
+    }
   }
 
   close(): void {
     this.container.classList.remove('modal_active');
     document.body.style.overflow = '';
     this.contentElement.replaceChildren();
+    this.events.emit(AppEvents.ModalClosed);
+    document.removeEventListener('keydown', this._handleEscape);
   }
 }

@@ -1,4 +1,5 @@
 import { IBuyer, BuyerValidationErrors } from "../../types";
+import { AppEvents } from "../../types/events";
 import { IEvents } from "../base/Events";
 
 export class BuyerData {
@@ -16,7 +17,7 @@ export class BuyerData {
 
 setData(data: Partial<IBuyer>): void {
   this.data = { ...this.data, ...data };
-  this.events.emit('buyer:changed', { ...this.data });
+  this.events.emit(AppEvents.BuyerChanged, { ...this.data });
 }
 
 getData(): IBuyer {
@@ -25,7 +26,7 @@ getData(): IBuyer {
 
 clear(): void {
   this.data = { payment: '', address: '', email: '', phone: '' };
-  this.events.emit('buyer:changed', { ...this.data });
+  this.events.emit(AppEvents.BuyerChanged, { ...this.data });
 }
 
 validate(): BuyerValidationErrors {
